@@ -135,7 +135,7 @@ app.get('/callback', async (req, res) => {
     const tokens = await getTokens(code as string);
     const uid = crypto.randomBytes(5).toString('hex');
     
-    saveUser(uid, {
+    await saveUser(uid, {
       accessToken: tokens.access_token,
       refreshToken: tokens.refresh_token,
       expiresAt: Date.now() + tokens.expires_in * 1000,

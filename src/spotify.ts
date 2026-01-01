@@ -6,8 +6,7 @@ dotenv.config();
 
 const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const CLIENT_SECRET = process.env.SPOTIFY_SECRET_ID;
-const REDIRECT_URI = process.env.REDIRECT_URI || "https://example.com/callback";
-// || 'http://localhost:3000/callback';
+const REDIRECT_URI = process.env.REDIRECT_URI || "https://spotify.beebombshell.com/callback";
 
 export const getAuthUrl = () => {
   const scope = 'user-read-currently-playing user-read-playback-state';
@@ -35,7 +34,7 @@ export const getTokens = async (code: string) => {
 };
 
 export const refreshAccessToken = async (uid: string) => {
-  const user = getUser(uid);
+  const user = await getUser(uid);
   if (!user) throw new Error('User not found');
 
   const response = await axios.post(
@@ -53,7 +52,7 @@ export const refreshAccessToken = async (uid: string) => {
   );
 
   const { access_token, expires_in, refresh_token } = response.data;
-  saveUser(uid, {
+  await saveUser(uid, {
     accessToken: access_token,
     refreshToken: refresh_token || user.refreshToken,
     expiresAt: Date.now() + expires_in * 1000,
@@ -63,7 +62,7 @@ export const refreshAccessToken = async (uid: string) => {
 };
 
 export const getNowPlaying = async (uid: string) => {
-  let user = getUser(uid);
+  let user = await getUser(uid);
   if (!user) return null;
 
   if (Date.now() > user.expiresAt) {
