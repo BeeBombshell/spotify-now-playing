@@ -43,6 +43,8 @@ const USERS_COLLECTION = 'users';
 
 interface UserData {
   uid: string;
+  spotifyId: string;
+  displayName: string;
   accessToken: string;
   refreshToken: string;
   expiresAt: number;
@@ -57,6 +59,16 @@ export const getUser = async (uid: string): Promise<UserData | null> => {
   if (doc.exists) {
     const data = doc.data() as Omit<UserData, 'uid'>;
     return { uid, ...data };
+  }
+  return null;
+};
+
+export const getUserBySpotifyId = async (spotifyId: string): Promise<UserData | null> => {
+  const querySnapshot = await db.collection(USERS_COLLECTION).where('spotifyId', '==', spotifyId).limit(1).get();
+  if (!querySnapshot.empty) {
+    const doc = querySnapshot.docs[0];
+    const data = doc.data() as Omit<UserData, 'uid'>;
+    return { uid: doc.id, ...data };
   }
   return null;
 };

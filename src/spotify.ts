@@ -9,7 +9,7 @@ const CLIENT_SECRET = process.env.SPOTIFY_SECRET_ID;
 const REDIRECT_URI = process.env.REDIRECT_URI || "https://spotify.beebombshell.com/callback";
 
 export const getAuthUrl = () => {
-  const scope = 'user-read-currently-playing user-read-playback-state';
+  const scope = 'user-read-currently-playing user-read-playback-state user-read-private';
   return `https://accounts.spotify.com/authorize?response_type=code&client_id=${CLIENT_ID}&scope=${encodeURIComponent(
     scope
   )}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
@@ -33,6 +33,15 @@ export const getTokens = async (code: string) => {
   return response.data;
 };
 
+export const getSpotifyProfile = async (accessToken: string) => {
+  const response = await axios.get('https://api.spotify.com/v1/me', {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return response.data;
+};
+
 export const refreshAccessToken = async (uid: string) => {
   const user = await getUser(uid);
   if (!user) throw new Error('User not found');
@@ -53,6 +62,8 @@ export const refreshAccessToken = async (uid: string) => {
 
   const { access_token, expires_in, refresh_token } = response.data;
   await saveUser(uid, {
+    spotifyId: user.spotifyId,
+    displayName: user.displayName,
     accessToken: access_token,
     refreshToken: refresh_token || user.refreshToken,
     expiresAt: Date.now() + expires_in * 1000,

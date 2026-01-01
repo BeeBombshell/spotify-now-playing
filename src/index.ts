@@ -1,8 +1,8 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import crypto from 'crypto';
-import { getAuthUrl, getTokens, getNowPlaying } from './spotify';
-import { saveUser, getUser } from './storage';
+import { getAuthUrl, getTokens, getNowPlaying, getSpotifyProfile } from './spotify';
+import { saveUser, getUser, getUserBySpotifyId } from './storage';
 import { getTemplate } from './template';
 import dotenv from 'dotenv';
 
@@ -118,6 +118,12 @@ app.get('/', (req, res) => {
         <footer>
           By <a href="https://github.com/BeeBombshell" target="_blank">BeeBombshell</a>
         </footer>
+        <script>
+          const uid = document.cookie.split('; ').find(row => row.startsWith('uid='))?.split('=')[1];
+          if (uid) {
+            window.location.href = \`/dashboard?uid=\${uid}\`;
+          }
+        </script>
       </body>
     </html>
   `);
@@ -133,13 +139,37 @@ app.get('/callback', async (req, res) => {
 
   try {
     const tokens = await getTokens(code as string);
-    const uid = crypto.randomBytes(5).toString('hex');
-    
-    await saveUser(uid, {
-      accessToken: tokens.access_token,
-      refreshToken: tokens.refresh_token,
-      expiresAt: Date.now() + tokens.expires_in * 1000,
-    });
+    const profile = await getSpotifyProfile(tokens.access_token);
+    const spotifyId = profile.id;
+    const displayName = profile.display_name || profile.id;
+
+    // Check if user exists
+    let user = await getUserBySpotifyId(spotifyId);
+    let uid: string;
+
+    if (user) {
+      uid = user.uid;
+      // Update tokens
+      await saveUser(uid, {
+        spotifyId,
+        displayName,
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token || user.refreshToken,
+        expiresAt: Date.now() + tokens.expires_in * 1000,
+      });
+    } else {
+      uid = crypto.randomBytes(5).toString('hex');
+      await saveUser(uid, {
+        spotifyId,
+        displayName,
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token,
+        expiresAt: Date.now() + tokens.expires_in * 1000,
+      });
+    }
+
+    // Set cookie for session persistence (30 days)
+    res.cookie('uid', uid, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: false });
 
     res.redirect(`/dashboard?uid=${uid}`);
   } catch (error) {
