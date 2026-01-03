@@ -11,14 +11,16 @@ A minimalist, high-performance service to display your live Spotify activity on 
 - **Real-time Updates**: Reflects what you are currently listening to on Spotify.
 - **Dynamic Styling**: Beautifully designed SVG-like HTML templates that look great in any theme.
 - **Easy Integration**: Simple Markdown or HTML snippets for embedding.
-- **Secure Auth**: Uses Spotify OAuth 2.0 with Firestore for persistent credential storage and automatic token refreshing.
+- **Secure Auth**: Uses Spotify OAuth 2.0 with state verification to prevent CSRF.
+- **Deduplication**: Automatically maps repeat logins to the same UID based on Spotify ID.
+- **Secure Sessions**: Uses signed, `httpOnly` cookies to protect user dashboards.
 - **Multi-user Support**: Generates unique UIDs for multiple users on the same instance.
 
 ## 🚀 How It Works
 
-1.  **Authentication**: Users visit the root URL and click "Connect Spotify".
-2.  **Authorization**: The service handles the OAuth callback, fetches access/refresh tokens, and generates a unique UID.
-3.  **Storage**: Tokens are stored securely in **Google Cloud Firestore**.
+1.  **Authentication**: Users visit the root URL and click "Connect Spotify". The service uses a `state` parameter to prevent CSRF attacks.
+2.  **Authorization**: The service handles the OAuth callback, fetches your Spotify profile, and checks if you already have an account.
+3.  **Storage**: Tokens and your display name are stored securely in **Google Cloud Firestore**, keyed by a unique UID.
 4.  **Retrieval**: When someone views your widget, the service fetches your current playing track from the Spotify API.
 5.  **Auto-Refresh**: If the access token is expired, the service automatically uses the refresh token to get a new one before fetching playback data.
 6.  **Rendering**: The service returns a responsive HTML/CSS template representing your "Now Playing" status.
@@ -60,6 +62,7 @@ cp .env.example .env
 | `SPOTIFY_CLIENT_ID` | Your Spotify App Client ID |
 | `SPOTIFY_SECRET_ID` | Your Spotify App Client Secret |
 | `REDIRECT_URI` | Must match Spotify App settings |
+| `SESSION_SECRET` | A secure random string for signing cookies (e.g., `openssl rand -base64 32`) |
 | `PORT` | Port to run the server (default 3000) |
 | `FIREBASE_PROJECT_ID` | Your Firebase Project ID |
 | `FIREBASE_SERVICE_ACCOUNT` | Raw JSON or Base64 encoded Service Account key |

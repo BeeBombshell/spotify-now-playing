@@ -8,11 +8,11 @@ const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const CLIENT_SECRET = process.env.SPOTIFY_SECRET_ID;
 const REDIRECT_URI = process.env.REDIRECT_URI || "https://spotify.beebombshell.com/callback";
 
-export const getAuthUrl = () => {
+export const getAuthUrl = (state: string) => {
   const scope = 'user-read-currently-playing user-read-playback-state user-read-private';
   return `https://accounts.spotify.com/authorize?response_type=code&client_id=${CLIENT_ID}&scope=${encodeURIComponent(
     scope
-  )}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
+  )}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&state=${state}`;
 };
 
 export const getTokens = async (code: string) => {

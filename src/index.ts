@@ -11,10 +11,15 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(cookieParser());
+app.use(cookieParser(process.env.SESSION_SECRET));
 app.use(express.json());
 
 app.get('/', (req, res) => {
+  const { uid } = req.signedCookies;
+  if (uid) {
+    return res.redirect(`/dashboard?uid=${uid}`);
+  }
+
   res.send(`
     <html>
       <head>
@@ -118,24 +123,32 @@ app.get('/', (req, res) => {
         <footer>
           By <a href="https://github.com/BeeBombshell" target="_blank">BeeBombshell</a>
         </footer>
-        <script>
-          const uid = document.cookie.split('; ').find(row => row.startsWith('uid='))?.split('=')[1];
-          if (uid) {
-            window.location.href = \`/dashboard?uid=\${uid}\`;
-          }
-        </script>
       </body>
     </html>
   `);
 });
 
 app.get('/login', (req, res) => {
-  res.redirect(getAuthUrl());
+  const state = crypto.randomBytes(16).toString('hex');
+  res.cookie('oauth_state', state, { 
+    maxAge: 15 * 60 * 1000, 
+    httpOnly: true, 
+    signed: true,
+    secure: process.env.NODE_ENV === 'production'
+  });
+  res.redirect(getAuthUrl(state));
 });
 
 app.get('/callback', async (req, res) => {
-  const { code } = req.query;
+  const { code, state } = req.query;
+  const { oauth_state } = req.signedCookies;
+
   if (!code) return res.status(400).send('No code provided');
+  if (!state || state !== oauth_state) {
+    return res.status(403).send('Invalid state parameter');
+  }
+
+  res.clearCookie('oauth_state');
 
   try {
     const tokens = await getTokens(code as string);
@@ -169,7 +182,12 @@ app.get('/callback', async (req, res) => {
     }
 
     // Set cookie for session persistence (30 days)
-    res.cookie('uid', uid, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: false });
+    res.cookie('uid', uid, { 
+      maxAge: 30 * 24 * 60 * 60 * 1000, 
+      httpOnly: true, 
+      signed: true,
+      secure: process.env.NODE_ENV === 'production'
+    });
 
     res.redirect(`/dashboard?uid=${uid}`);
   } catch (error) {
