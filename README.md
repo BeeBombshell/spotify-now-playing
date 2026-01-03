@@ -14,8 +14,8 @@
   </p>
 
   <p align="center">
-    <a href="https://spotify.beebombshell.com/now-playing?uid=4d2fff1bf3">
-      <img src="https://spotify.beebombshell.com/now-playing?uid=4d2fff1bf3" alt="Spotify Now Playing" />
+    <a href="https://spotify.beebombshell.com/now-playing?uid=a55e8495c5">
+      <img src="https://spotify.beebombshell.com/now-playing?uid=a55e8495c5" alt="Spotify Now Playing" />
     </a>
   </p>
 </div>
