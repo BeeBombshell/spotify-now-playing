@@ -232,7 +232,7 @@ app.get('/', (req, res) => {
           </details>
         </div>
         <footer>
-          By <a href="https://github.com/BeeBombshell" target="_blank" style="color: white; text-decoration: none; font-weight: 600;">BeeBombshell</a> | <a href="https://github.com/BeeBombshell/now-playing" target="_blank" style="color: var(--text-dim); text-decoration: none;">Source Code</a>
+          By <a href="https://beebombshell.com" target="_blank" style="color: white; text-decoration: none; font-weight: 600;">BeeBombshell</a> | <a href="https://github.com/BeeBombshell/spotify-now-playing" target="_blank" style="color: var(--text-dim); text-decoration: none;">Source Code</a>
         </footer>
       </body>
     </html>
@@ -572,7 +572,7 @@ app.get('/dashboard', async (req, res) => {
               Revoking access will permanently delete your credentials and tokens from our records.
             </p>
             <div style="background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.2); padding: 16px; border-radius: 12px; font-size: 13px; color: #fbbf24; margin-bottom: 24px; line-height: 1.5;">
-              <strong>Note:</strong> If you are concerned about privacy, we encourage you to <a href="https://github.com/BeeBombshell/now-playing" target="_blank" style="color: #fbbf24; font-weight: 700;">clone the repository</a> and host your own instance!
+              <strong>Note:</strong> If you are concerned about privacy, we encourage you to <a href="https://github.com/BeeBombshell/spotify-now-playing" target="_blank" style="color: #fbbf24; font-weight: 700;">clone the repository</a> and host your own instance!
             </div>
             <div class="management-actions">
               <form action="/revoke" method="POST" onsubmit="return confirm('Are you sure you want to revoke access? This will permanently delete your stored credentials and you will need to reconnect.')">
@@ -582,7 +582,7 @@ app.get('/dashboard', async (req, res) => {
           </div>
 
           <div class="footer">
-            By <a href="https://github.com/BeeBombshell" target="_blank">BeeBombshell</a>
+            By <a href="https://beebombshell.com" target="_blank">BeeBombshell</a>
           </div>
         </div>
 

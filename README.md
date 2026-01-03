@@ -67,7 +67,7 @@ If you want to host your own instance of this service:
 
 #### 2. Local Installation
 ```bash
-git clone https://github.com/BeeBombshell/now-playing.git
+git clone https://github.com/BeeBombshell/spotify-now-playing.git
 cd now-playing
 npm install
 ```
@@ -112,4 +112,4 @@ Add this to your `README.md`:
 The widget template is located in `src/template.ts`. You can easily modify the CSS and HTML structure to match your personal brand.
 
 ---
-Created with ❤️ by [BeeBombshell](https://github.com/BeeBombshell)
+Created with ❤️ by [BeeBombshell](https://beebombshell.com)
