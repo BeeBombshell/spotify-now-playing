@@ -11,6 +11,7 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
+app.set('trust proxy', true);
 app.use(cookieParser(process.env.SESSION_SECRET));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -324,7 +325,10 @@ app.get('/dashboard', async (req, res) => {
   const nowPlaying = await getNowPlaying(uid as string);
   const user = await getUser(uid as string);
   const widgetHtml = getTemplate(nowPlaying);
-  const baseUrl = `${req.protocol}://${req.get('host')}`;
+  
+  // Robust protocol detection
+  const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+  const baseUrl = `${protocol}://${req.get('host')}`;
   const widgetUrl = `${baseUrl}/now-playing?uid=${uid}`;
 
   const maskedClientId = user?.clientId ? `${user.clientId.substring(0, 4)}...${user.clientId.substring(user.clientId.length - 4)}` : 'Unknown';
