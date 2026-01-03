@@ -2,7 +2,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import crypto from 'crypto';
 import { getAuthUrl, getTokens, getNowPlaying, getSpotifyProfile, getImageBase64 } from './spotify';
-import { saveUser, getUser, getUserBySpotifyId } from './storage';
+import { saveUser, getUser, getUserBySpotifyId, deleteUser } from './storage';
 import { getTemplate, getSVGTemplate } from './template';
 import dotenv from 'dotenv';
 
@@ -213,6 +213,10 @@ app.get('/', (req, res) => {
             <button type="submit" class="btn">Connect Dashboard</button>
           </form>
 
+          <div style="margin-top: 24px; font-size: 12px; color: var(--text-dim); line-height: 1.5;">
+            <p>🔒 <strong>Privacy Note:</strong> Your credentials are stored securely and used only to fetch your music activity. You can revoke access at any time from your dashboard, which will permanently delete your data.</p>
+          </div>
+
           <details class="setup-guide">
             <summary>How to set up your Spotify App</summary>
             <div class="setup-content">
@@ -228,7 +232,7 @@ app.get('/', (req, res) => {
           </details>
         </div>
         <footer>
-          By <a href="https://github.com/BeeBombshell" target="_blank" style="color: white; text-decoration: none; font-weight: 600;">BeeBombshell</a>
+          By <a href="https://github.com/BeeBombshell" target="_blank" style="color: white; text-decoration: none; font-weight: 600;">BeeBombshell</a> | <a href="https://github.com/BeeBombshell/now-playing" target="_blank" style="color: var(--text-dim); text-decoration: none;">Source Code</a>
         </footer>
       </body>
     </html>
@@ -470,6 +474,39 @@ app.get('/dashboard', async (req, res) => {
             font-size: 14px;
           }
           .footer a { color: #fff; text-decoration: none; font-weight: 600; }
+          .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+          }
+          .btn-outline:hover {
+            border-color: var(--text-main);
+            color: var(--text-main);
+          }
+          .btn-danger {
+            background: transparent;
+            border: 1px solid rgba(255, 68, 68, 0.3);
+            color: #ff4444;
+          }
+          .btn-danger:hover {
+            background: rgba(255, 68, 68, 0.1);
+            border-color: #ff4444;
+          }
+          .management-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+          }
+          .btn-small {
+            padding: 10px 20px;
+            font-size: 13px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+          }
         </style>
       </head>
       <body>
@@ -479,6 +516,7 @@ app.get('/dashboard', async (req, res) => {
               <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zm5.508 17.303c-.216.354-.675.466-1.03.25-2.853-1.743-6.444-2.138-10.673-1.172-.406.092-.813-.16-.904-.565-.092-.406.161-.813.566-.905 4.633-1.06 8.583-.615 11.79 1.344.355.216.467.675.251 1.03zm1.48-3.26c-.272.443-.848.583-1.291.31-3.262-2.004-8.23-2.585-12.086-1.414-.498.151-1.025-.13-1.176-.628-.151-.498.13-1.025.628-1.176 4.417-1.34 9.878-.68 13.616 1.616.442.272.583.848.31 1.291zm.128-3.4c-3.912-2.323-10.363-2.537-14.126-1.396-.6.182-1.234-.162-1.416-.763-.182-.6.162-1.233.763-1.415 4.316-1.31 11.439-1.062 15.968 1.625.539.319.718 1.018.399 1.556-.32.538-1.019.718-1.557.399z"/></svg>
               <span>Dashboard</span>
             </a>
+            <a href="/logout" class="btn-small btn-outline">Logout</a>
           </div>
 
           <div class="card">
@@ -527,6 +565,22 @@ app.get('/dashboard', async (req, res) => {
             </div>
           </div>
 
+          <div class="card">
+            <h2>Manage Access</h2>
+            <p style="font-size: 14px; color: var(--text-dim); margin-bottom: 20px;">
+              Your Spotify credentials (Client ID and Secret) are stored in our database only to facilitate this service. 
+              Revoking access will permanently delete your credentials and tokens from our records.
+            </p>
+            <div style="background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.2); padding: 16px; border-radius: 12px; font-size: 13px; color: #fbbf24; margin-bottom: 24px; line-height: 1.5;">
+              <strong>Note:</strong> If you are concerned about privacy, we encourage you to <a href="https://github.com/BeeBombshell/now-playing" target="_blank" style="color: #fbbf24; font-weight: 700;">clone the repository</a> and host your own instance!
+            </div>
+            <div class="management-actions">
+              <form action="/revoke" method="POST" onsubmit="return confirm('Are you sure you want to revoke access? This will permanently delete your stored credentials and you will need to reconnect.')">
+                <button type="submit" class="btn-small btn-danger">Revoke Access & Delete Data</button>
+              </form>
+            </div>
+          </div>
+
           <div class="footer">
             By <a href="https://github.com/BeeBombshell" target="_blank">BeeBombshell</a>
           </div>
@@ -566,6 +620,20 @@ app.get('/now-playing', async (req, res) => {
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
   res.send(svg);
+});
+
+app.get('/logout', (req, res) => {
+  res.clearCookie('uid');
+  res.redirect('/');
+});
+
+app.post('/revoke', async (req, res) => {
+  const { uid } = req.signedCookies;
+  if (uid) {
+    await deleteUser(uid);
+    res.clearCookie('uid');
+  }
+  res.redirect('/');
 });
 
 app.listen(port, () => {

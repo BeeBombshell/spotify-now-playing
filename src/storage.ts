@@ -75,3 +75,7 @@ export const getUserBySpotifyId = async (spotifyId: string): Promise<UserData | 
   }
   return null;
 };
+
+export const deleteUser = async (uid: string) => {
+  await db.collection(USERS_COLLECTION).doc(uid).delete();
+};
