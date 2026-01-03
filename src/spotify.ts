@@ -11,14 +11,14 @@ const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const CLIENT_SECRET = process.env.SPOTIFY_SECRET_ID;
 const REDIRECT_URI = process.env.REDIRECT_URI || "https://spotify.beebombshell.com/callback";
 
-export const getAuthUrl = (state: string) => {
+export const getAuthUrl = (state: string, clientId: string) => {
   const scope = 'user-read-currently-playing user-read-playback-state user-read-private';
-  return `https://accounts.spotify.com/authorize?response_type=code&client_id=${CLIENT_ID}&scope=${encodeURIComponent(
+  return `https://accounts.spotify.com/authorize?response_type=code&client_id=${clientId}&scope=${encodeURIComponent(
     scope
   )}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&state=${state}`;
 };
 
-export const getTokens = async (code: string) => {
+export const getTokens = async (code: string, clientId: string, clientSecret: string) => {
   const response = await axios.post(
     'https://accounts.spotify.com/api/token',
     new URLSearchParams({
@@ -28,7 +28,7 @@ export const getTokens = async (code: string) => {
     }),
     {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
     }
@@ -57,7 +57,7 @@ export const refreshAccessToken = async (uid: string) => {
     }),
     {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(`${user.clientId}:${user.clientSecret}`).toString('base64')}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
     }
@@ -70,6 +70,8 @@ export const refreshAccessToken = async (uid: string) => {
     accessToken: access_token,
     refreshToken: refresh_token || user.refreshToken,
     expiresAt: Date.now() + expires_in * 1000,
+    clientId: user.clientId,
+    clientSecret: user.clientSecret,
   });
 
   return access_token;

@@ -48,6 +48,8 @@ interface UserData {
   accessToken: string;
   refreshToken: string;
   expiresAt: number;
+  clientId: string;
+  clientSecret: string;
 }
 
 export const saveUser = async (uid: string, data: Omit<UserData, 'uid'>) => {

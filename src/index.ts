@@ -13,7 +13,7 @@ const port = process.env.PORT || 3000;
 
 app.use(cookieParser(process.env.SESSION_SECRET));
 app.use(express.json());
-
+app.use(express.urlencoded({ extended: true }));
 app.get('/', (req, res) => {
   const { uid } = req.signedCookies;
   if (uid) {
@@ -32,6 +32,7 @@ app.get('/', (req, res) => {
             --surface: #121212;
             --text-main: #FFFFFF;
             --text-dim: #A7A7A7;
+            --input-bg: #1A1A1A;
           }
           body { 
             font-family: 'Outfit', sans-serif; 
@@ -43,7 +44,6 @@ app.get('/', (req, res) => {
             justify-content: center; 
             min-height: 100vh; 
             margin: 0; 
-            overflow: hidden;
           }
           .background-glow {
             position: fixed;
@@ -59,54 +59,131 @@ app.get('/', (req, res) => {
           .container { 
             text-align: center; 
             background: rgba(18, 18, 18, 0.7); 
-            padding: 60px 40px; 
+            padding: 40px; 
             border-radius: 32px; 
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 24px 64px rgba(0,0,0,0.6);
-            max-width: 400px;
+            max-width: 440px;
             width: 90%;
           }
           .icon-container {
             margin-bottom: 24px;
           }
           .spotify-icon {
-            width: 64px;
-            height: 64px;
+            width: 48px;
+            height: 48px;
             fill: var(--spotify-green);
-            filter: drop-shadow(0 0 12px rgba(29, 185, 84, 0.4));
           }
-          h1 { margin: 0 0 12px 0; font-size: 32px; font-weight: 700; letter-spacing: -0.02em; }
-          p { margin: 0 0 40px 0; color: var(--text-dim); line-height: 1.6; font-size: 16px; }
+          h1 { margin: 0 0 12px 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+          p { margin: 0 0 32px 0; color: var(--text-dim); line-height: 1.6; font-size: 15px; }
+          .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+          }
+          label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-dim);
+          }
+          input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--input-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-family: inherit;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+          }
+          input:focus {
+            outline: none;
+            border-color: var(--spotify-green);
+          }
           .btn { 
+            width: 100%;
             background: var(--spotify-green); 
             color: #000; 
-            padding: 16px 32px; 
+            padding: 14px; 
             border-radius: 100px; 
-            text-decoration: none; 
+            border: none;
+            font-family: inherit;
             font-weight: 700; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: inline-block;
-            box-shadow: 0 8px 16px rgba(29, 185, 84, 0.2);
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 12px;
           }
           .btn:hover { 
             background: #1ed760; 
-            transform: scale(1.05);
-            box-shadow: 0 12px 24px rgba(29, 185, 84, 0.3);
+            transform: translateY(-2px);
+          }
+          .info-box {
+            background: rgba(29, 185, 84, 0.1);
+            border: 1px solid rgba(29, 185, 84, 0.2);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            font-size: 13px;
+            text-align: left;
+            color: #1ed760;
+          }
+          .setup-guide {
+            text-align: left;
+            margin-top: 32px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+          }
+          .setup-guide summary {
+            padding: 16px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-dim);
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+          }
+          .setup-guide summary:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+          }
+          .setup-content {
+            padding: 0 16px 16px 16px;
+            font-size: 13px;
+            color: var(--text-dim);
+            line-height: 1.6;
+          }
+          .setup-content ol {
+            padding-left: 20px;
+            margin: 12px 0;
+          }
+          .setup-content li {
+            margin-bottom: 8px;
+          }
+          .setup-content strong {
+            color: var(--spotify-green);
+          }
+          .setup-guide summary::before {
+            content: '→';
+            display: inline-block;
+            transition: transform 0.2s;
+          }
+          .setup-guide[open] summary::before {
+            transform: rotate(90deg);
           }
           footer {
             margin-top: 40px;
             font-size: 14px;
             color: var(--text-dim);
-          }
-          footer a {
-            color: var(--text-main);
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.2s;
-          }
-          footer a:hover {
-            color: var(--spotify-green);
           }
         </style>
       </head>
@@ -116,42 +193,89 @@ app.get('/', (req, res) => {
           <div class="icon-container">
             <svg class="spotify-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zm5.508 17.303c-.216.354-.675.466-1.03.25-2.853-1.743-6.444-2.138-10.673-1.172-.406.092-.813-.16-.904-.565-.092-.406.161-.813.566-.905 4.633-1.06 8.583-.615 11.79 1.344.355.216.467.675.251 1.03zm1.48-3.26c-.272.443-.848.583-1.291.31-3.262-2.004-8.23-2.585-12.086-1.414-.498.151-1.025-.13-1.176-.628-.151-.498.13-1.025.628-1.176 4.417-1.34 9.878-.68 13.616 1.616.442.272.583.848.31 1.291zm.128-3.4c-3.912-2.323-10.363-2.537-14.126-1.396-.6.182-1.234-.162-1.416-.763-.182-.6.162-1.233.763-1.415 4.316-1.31 11.439-1.062 15.968 1.625.539.319.718 1.018.399 1.556-.32.538-1.019.718-1.557.399z"/></svg>
           </div>
-          <h1>Now Playing</h1>
-          <p>A minimalist Spotify widget for your profile, website, or GitHub Readme.</p>
-          <a href="/login" class="btn">Connect Spotify</a>
+          <h1>Spotify Now Playing</h1>
+          <p>Create a stunning, live Spotify widget for your GitHub profile. Use your own Spotify App credentials for full control and unlimited access.</p>
+          
+          <div class="info-box">
+            Add <strong>https://spotify.beebombshell.com/callback</strong> as a Redirect URI in your Spotify App.
+          </div>
+
+          <form action="/login" method="POST">
+            <div class="form-group">
+              <label for="clientId">Spotify Client ID</label>
+              <input type="text" id="clientId" name="clientId" placeholder="Enter your Client ID" required>
+            </div>
+            <div class="form-group">
+              <label for="clientSecret">Spotify Client Secret</label>
+              <input type="password" id="clientSecret" name="clientSecret" placeholder="Enter your Client Secret" required>
+            </div>
+            <button type="submit" class="btn">Connect Dashboard</button>
+          </form>
+
+          <details class="setup-guide">
+            <summary>How to set up your Spotify App</summary>
+            <div class="setup-content">
+              <ol>
+                <li>Visit the <a href="https://developer.spotify.com/dashboard" target="_blank" style="color: var(--spotify-green);">Spotify Developer Dashboard</a>.</li>
+                <li>Click <strong>Create app</strong> and give it a name and description.</li>
+                <li>Go to <strong>Settings</strong> and add the Redirect URI: <br>
+                <code style="background: #000; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; border: 1px solid #333;">https://spotify.beebombshell.com/callback</code></li>
+                <li>Click <strong>Save</strong> at the bottom.</li>
+                <li>Copy your <strong>Client ID</strong> and <strong>Client Secret</strong> into the form above.</li>
+              </ol>
+            </div>
+          </details>
         </div>
         <footer>
-          By <a href="https://github.com/BeeBombshell" target="_blank">BeeBombshell</a>
+          By <a href="https://github.com/BeeBombshell" target="_blank" style="color: white; text-decoration: none; font-weight: 600;">BeeBombshell</a>
         </footer>
       </body>
     </html>
   `);
 });
 
-app.get('/login', (req, res) => {
+app.post('/login', (req, res) => {
+  const { clientId, clientSecret } = req.body;
+  if (!clientId || !clientSecret) {
+    return res.status(400).send('Client ID and Client Secret are required');
+  }
+
   const state = crypto.randomBytes(16).toString('hex');
-  res.cookie('oauth_state', state, { 
+  
+  // Store credentials in signed cookies temporarily
+  const cookieOptions = { 
     maxAge: 15 * 60 * 1000, 
     httpOnly: true, 
     signed: true,
     secure: process.env.NODE_ENV === 'production'
-  });
-  res.redirect(getAuthUrl(state));
+  };
+
+  res.cookie('oauth_state', state, cookieOptions);
+  res.cookie('temp_client_id', clientId, cookieOptions);
+  res.cookie('temp_client_secret', clientSecret, cookieOptions);
+
+  res.redirect(getAuthUrl(state, clientId));
 });
 
 app.get('/callback', async (req, res) => {
   const { code, state } = req.query;
-  const { oauth_state } = req.signedCookies;
+  const { oauth_state, temp_client_id: clientId, temp_client_secret: clientSecret } = req.signedCookies;
 
   if (!code) return res.status(400).send('No code provided');
   if (!state || state !== oauth_state) {
     return res.status(403).send('Invalid state parameter');
   }
 
+  if (!clientId || !clientSecret) {
+    return res.status(400).send('Credentials missing. Please try again from the home page.');
+  }
+
   res.clearCookie('oauth_state');
+  res.clearCookie('temp_client_id');
+  res.clearCookie('temp_client_secret');
 
   try {
-    const tokens = await getTokens(code as string);
+    const tokens = await getTokens(code as string, clientId, clientSecret);
     const profile = await getSpotifyProfile(tokens.access_token);
     const spotifyId = profile.id;
     const displayName = profile.display_name || profile.id;
@@ -160,25 +284,22 @@ app.get('/callback', async (req, res) => {
     let user = await getUserBySpotifyId(spotifyId);
     let uid: string;
 
+    const userData = {
+      spotifyId,
+      displayName,
+      accessToken: tokens.access_token,
+      refreshToken: tokens.refresh_token || (user ? user.refreshToken : ''),
+      expiresAt: Date.now() + tokens.expires_in * 1000,
+      clientId,
+      clientSecret,
+    };
+
     if (user) {
       uid = user.uid;
-      // Update tokens
-      await saveUser(uid, {
-        spotifyId,
-        displayName,
-        accessToken: tokens.access_token,
-        refreshToken: tokens.refresh_token || user.refreshToken,
-        expiresAt: Date.now() + tokens.expires_in * 1000,
-      });
+      await saveUser(uid, userData);
     } else {
       uid = crypto.randomBytes(5).toString('hex');
-      await saveUser(uid, {
-        spotifyId,
-        displayName,
-        accessToken: tokens.access_token,
-        refreshToken: tokens.refresh_token,
-        expiresAt: Date.now() + tokens.expires_in * 1000,
-      });
+      await saveUser(uid, userData);
     }
 
     // Set cookie for session persistence (30 days)
@@ -201,9 +322,12 @@ app.get('/dashboard', async (req, res) => {
   if (!uid) return res.status(400).send('No UID provided');
 
   const nowPlaying = await getNowPlaying(uid as string);
+  const user = await getUser(uid as string);
   const widgetHtml = getTemplate(nowPlaying);
   const baseUrl = `${req.protocol}://${req.get('host')}`;
   const widgetUrl = `${baseUrl}/now-playing?uid=${uid}`;
+
+  const maskedClientId = user?.clientId ? `${user.clientId.substring(0, 4)}...${user.clientId.substring(user.clientId.length - 4)}` : 'Unknown';
 
   res.send(`
     <html>
@@ -259,6 +383,17 @@ app.get('/dashboard', async (req, res) => {
             border-radius: 24px;
             padding: 32px;
             margin-bottom: 24px;
+          }
+          .credentials-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: var(--text-dim);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-top: 12px;
           }
           h2 { margin-top: 0; font-size: 20px; color: var(--text-main); margin-bottom: 24px; }
           .preview-container {
@@ -348,6 +483,11 @@ app.get('/dashboard', async (req, res) => {
               ${widgetHtml}
             </div>
             <p style="font-size: 14px; color: var(--text-dim); text-align: center;">Make sure you have music playing on Spotify to see the live data.</p>
+            
+            <div class="credentials-info">
+              <svg style="width: 18px; height: 18px; fill: var(--spotify-green);" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 6c1.4 0 2.5 1.1 2.5 2.5S13.4 12 12 12s-2.5-1.1-2.5-2.5S10.6 7 12 7zm0 10c-2.3 0-4.3-1.1-5.6-2.8.2-1.3 2.7-2.2 5.6-2.2s5.4.9 5.6 2.2C16.3 15.9 14.3 17 12 17z"/></svg>
+              Using Spotify App: <strong>${maskedClientId}</strong>
+            </div>
           </div>
 
           <div class="card">
