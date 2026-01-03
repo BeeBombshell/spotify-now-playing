@@ -1,10 +1,13 @@
 # 🎵 Spotify Now Playing Widget
 
+
 A minimalist, high-performance service to display your live Spotify activity on your GitHub profile, personal website, or blog.
 
 ![Preview Example](https://img.shields.io/badge/Status-Live-brightgreen)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
 ![Firebase](https://img.shields.io/badge/Storage-Firestore-orange)
+
+[![Spotify Now Playing](https://spotify.beebombshell.com/now-playing?uid=4d2fff1bf3)](https://spotify.beebombshell.com/now-playing?uid=4d2fff1bf3)
 
 ## ✨ Features
 
