@@ -37,22 +37,27 @@ export const getSVGTemplate = (data: any, albumArtBase64?: string | null) => {
   return `
     <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" xmlns="http://www.w3.org/2000/svg">
       <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600&amp;display=swap');
         .track-name { font: 600 16px ${FONT_STACK}; fill: white; }
         .artist-name { font: 400 14px ${FONT_STACK}; fill: #b3b3b3; }
         .status-text { font: 600 11px ${FONT_STACK}; fill: ${statusColor}; text-transform: uppercase; letter-spacing: 0.1em; }
         
-        .bars-container { display: ${is_playing ? 'flex' : 'none'}; gap: 2px; height: 12px; align-items: flex-end; }
-        .bar { width: 3px; background: #1DB954; animation: equalize 1s infinite; border-radius: 1px; }
-        .bar:nth-child(1) { animation-delay: 0.1s; height: 6px; }
-        .bar:nth-child(2) { animation-delay: 0.3s; height: 10px; }
-        .bar:nth-child(3) { animation-delay: 0.5s; height: 8px; }
-        .bar:nth-child(4) { animation-delay: 0.2s; height: 12px; }
+        .bars-container { display: ${is_playing ? 'block' : 'none'}; }
+        .bar { 
+          fill: #1DB954; 
+          animation: equalize 1s infinite; 
+          transform-origin: bottom;
+          transform-box: fill-box;
+        }
+        .bar:nth-child(1) { animation-delay: 0.1s; }
+        .bar:nth-child(2) { animation-delay: 0.3s; }
+        .bar:nth-child(3) { animation-delay: 0.5s; }
+        .bar:nth-child(4) { animation-delay: 0.2s; }
 
         @keyframes equalize {
-          0% { height: 4px; }
-          50% { height: 12px; }
-          100% { height: 4px; }
+          0% { transform: scaleY(0.3); }
+          50% { transform: scaleY(1); }
+          100% { transform: scaleY(0.3); }
         }
 
         .fade-in { animation: fadeIn 0.8s ease-out forwards; opacity: 0; }
@@ -86,10 +91,10 @@ export const getSVGTemplate = (data: any, albumArtBase64?: string | null) => {
           <g transform="translate(0, 40)">
             ${is_playing ? `
               <g class="bars-container" transform="translate(0, 1)">
-                <rect class="bar" x="0" y="0" width="3" height="6" />
-                <rect class="bar" x="5" y="0" width="3" height="10" />
-                <rect class="bar" x="10" y="0" width="3" height="8" />
-                <rect class="bar" x="15" y="0" width="3" height="12" />
+                <rect class="bar" x="0" y="0" width="3" height="12" rx="1.5" />
+                <rect class="bar" x="5" y="0" width="3" height="12" rx="1.5" />
+                <rect class="bar" x="10" y="0" width="3" height="12" rx="1.5" />
+                <rect class="bar" x="15" y="0" width="3" height="12" rx="1.5" />
               </g>
             ` : `
               <circle class="pulse" cx="4" cy="7" r="4" fill="${statusColor}" style="transform-origin: 4px 7px;" />
