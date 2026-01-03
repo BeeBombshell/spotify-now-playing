@@ -1,4 +1,4 @@
-export const getSVGTemplate = (data: any) => {
+export const getSVGTemplate = (data: any, albumArtBase64?: string | null) => {
   const width = 350;
   const height = 114;
 
@@ -15,7 +15,7 @@ export const getSVGTemplate = (data: any) => {
   const { item, is_playing } = data;
   const trackName = item.name.replace(/&/g, '&amp;');
   const artistName = item.artists.map((a: any) => a.name).join(', ').replace(/&/g, '&amp;');
-  const albumArt = item.album.images[0].url;
+  const albumArt = albumArtBase64 || item.album.images[0].url;
 
   return `
     <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" xmlns="http://www.w3.org/2000/svg">

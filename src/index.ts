@@ -1,7 +1,7 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import crypto from 'crypto';
-import { getAuthUrl, getTokens, getNowPlaying, getSpotifyProfile } from './spotify';
+import { getAuthUrl, getTokens, getNowPlaying, getSpotifyProfile, getImageBase64 } from './spotify';
 import { saveUser, getUser, getUserBySpotifyId } from './storage';
 import { getTemplate, getSVGTemplate } from './template';
 import dotenv from 'dotenv';
@@ -483,6 +483,7 @@ app.get('/dashboard', async (req, res) => {
               ${widgetHtml}
             </div>
             <p style="font-size: 14px; color: var(--text-dim); text-align: center;">Make sure you have music playing on Spotify to see the live data.</p>
+            <p style="font-size: 12px; color: #fbbf24; text-align: center; margin-top: -10px;">Note: GitHub caches images for a few minutes. Updates may not be instantaneous on your profile.</p>
             
             <div class="credentials-info">
               <svg style="width: 18px; height: 18px; fill: var(--spotify-green);" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 6c1.4 0 2.5 1.1 2.5 2.5S13.4 12 12 12s-2.5-1.1-2.5-2.5S10.6 7 12 7zm0 10c-2.3 0-4.3-1.1-5.6-2.8.2-1.3 2.7-2.2 5.6-2.2s5.4.9 5.6 2.2C16.3 15.9 14.3 17 12 17z"/></svg>
@@ -548,10 +549,18 @@ app.get('/now-playing', async (req, res) => {
   if (!uid) return res.status(400).send('No UID provided');
 
   const nowPlaying = await getNowPlaying(uid as string);
-  const svg = getSVGTemplate(nowPlaying);
+  
+  let albumArtBase64 = null;
+  if (nowPlaying && nowPlaying.item) {
+    albumArtBase64 = await getImageBase64(nowPlaying.item.album.images[0].url);
+  }
+
+  const svg = getSVGTemplate(nowPlaying, albumArtBase64);
   
   res.setHeader('Content-Type', 'image/svg+xml');
-  res.setHeader('Cache-Control', 'public, max-age=30');
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   res.send(svg);
 });
 

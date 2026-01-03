@@ -108,3 +108,14 @@ export const getNowPlaying = async (uid: string) => {
     return null;
   }
 };
+export const getImageBase64 = async (url: string) => {
+  try {
+    const response = await axios.get(url, { responseType: 'arraybuffer' });
+    const buffer = Buffer.from(response.data, 'binary');
+    const mimeType = response.headers['content-type'];
+    return `data:${mimeType};base64,${buffer.toString('base64')}`;
+  } catch (error) {
+    console.error('Error fetching image for base64 conversion:', error);
+    return null;
+  }
+};
