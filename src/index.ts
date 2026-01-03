@@ -3,7 +3,7 @@ import cookieParser from 'cookie-parser';
 import crypto from 'crypto';
 import { getAuthUrl, getTokens, getNowPlaying, getSpotifyProfile } from './spotify';
 import { saveUser, getUser, getUserBySpotifyId } from './storage';
-import { getTemplate } from './template';
+import { getTemplate, getSVGTemplate } from './template';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -408,8 +408,11 @@ app.get('/now-playing', async (req, res) => {
   if (!uid) return res.status(400).send('No UID provided');
 
   const nowPlaying = await getNowPlaying(uid as string);
-  const html = getTemplate(nowPlaying);
-  res.send(html);
+  const svg = getSVGTemplate(nowPlaying);
+  
+  res.setHeader('Content-Type', 'image/svg+xml');
+  res.setHeader('Cache-Control', 'public, max-age=30');
+  res.send(svg);
 });
 
 app.listen(port, () => {

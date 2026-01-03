@@ -1,3 +1,58 @@
+export const getSVGTemplate = (data: any) => {
+  const width = 350;
+  const height = 114;
+
+  if (!data || !data.item) {
+    return `
+      <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="${width}" height="${height}" rx="16" fill="#121212" />
+        <rect x="0.5" y="0.5" width="${width - 1}" height="${height - 1}" rx="15.5" stroke="white" stroke-opacity="0.1" />
+        <text fill="#A7A7A7" font-family="sans-serif" font-size="14" x="50%" y="50%" text-anchor="middle" dominant-baseline="middle">Not playing anything</text>
+      </svg>
+    `;
+  }
+
+  const { item, is_playing } = data;
+  const trackName = item.name.replace(/&/g, '&amp;');
+  const artistName = item.artists.map((a: any) => a.name).join(', ').replace(/&/g, '&amp;');
+  const albumArt = item.album.images[0].url;
+
+  return `
+    <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <style>
+        .track-name { font: 600 16px 'Outfit', 'Inter', sans-serif; fill: white; }
+        .artist-name { font: 400 14px 'Outfit', 'Inter', sans-serif; fill: #b3b3b3; }
+        .status-text { font: 600 11px 'Outfit', 'Inter', sans-serif; fill: #1DB954; text-transform: uppercase; letter-spacing: 0.1em; }
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse {
+          0% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.5; transform: scale(1.1); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+      </style>
+      
+      <rect width="${width}" height="${height}" rx="16" fill="#121212" />
+      <rect x="0.5" y="0.5" width="${width - 1}" height="${height - 1}" rx="15.5" stroke="white" stroke-opacity="0.1" />
+      
+      <clipPath id="albumArtClip">
+        <rect x="16" y="17" width="80" height="80" rx="12" />
+      </clipPath>
+      
+      <image href="${albumArt}" x="16" y="17" width="80" height="80" clip-path="url(#albumArtClip)" preserveAspectRatio="xMidYMid slice" />
+      
+      <g transform="translate(112, 35)">
+        <text class="track-name" x="0" y="0">${trackName}</text>
+        <text class="artist-name" x="0" y="22">${artistName}</text>
+        
+        <g transform="translate(0, 48)">
+          <circle class="pulse" cx="4" cy="4" r="4" fill="#1DB954" style="transform-origin: 4px 4px;" />
+          <text class="status-text" x="16" y="7.5">${is_playing ? 'Currently Playing' : 'Paused'}</text>
+        </g>
+      </g>
+    </svg>
+  `;
+};
+
 export const getTemplate = (data: any) => {
   if (!data || !data.item) {
     return `

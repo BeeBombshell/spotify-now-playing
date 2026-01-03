@@ -10,7 +10,8 @@ A minimalist, high-performance service to display your live Spotify activity on 
 
 - **Real-time Updates**: Reflects what you are currently listening to on Spotify.
 - **Server-Side Caching**: Uses in-memory caching (30s TTL) to reduce API calls and protect rate limits.
-- **Dynamic Styling**: Beautifully designed SVG-like HTML templates that look great in any theme.
+- **SVG Rendering**: Returns a crisp, lightweight SVG image that renders perfectly in GitHub Readmes.
+- **Dynamic Styling**: Beautifully designed templates that look great in any theme.
 - **Easy Integration**: Simple Markdown or HTML snippets for embedding.
 - **Secure Auth**: Uses Spotify OAuth 2.0 with state verification to prevent CSRF.
 - **Deduplication**: Automatically maps repeat logins to the same UID based on Spotify ID.
