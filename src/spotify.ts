@@ -1,8 +1,11 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
+import NodeCache from 'node-cache';
 import { getUser, saveUser } from './storage';
 
 dotenv.config();
+
+const cache = new NodeCache({ stdTTL: 30 }); // Cache for 30 seconds
 
 const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const CLIENT_SECRET = process.env.SPOTIFY_SECRET_ID;
@@ -73,6 +76,9 @@ export const refreshAccessToken = async (uid: string) => {
 };
 
 export const getNowPlaying = async (uid: string) => {
+  const cachedData = cache.get(uid);
+  if (cachedData) return cachedData;
+
   let user = await getUser(uid);
   if (!user) return null;
 
@@ -89,9 +95,11 @@ export const getNowPlaying = async (uid: string) => {
     });
 
     if (response.status === 204 || response.status > 400 || !response.data) {
+      cache.set(uid, null);
       return null;
     }
 
+    cache.set(uid, response.data);
     return response.data;
   } catch (error) {
     console.error('Error fetching now playing track:', error);
