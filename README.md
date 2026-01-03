@@ -1,13 +1,24 @@
 # 🎵 Spotify Now Playing Widget
 
+<div align="center">
+  <p align="center">
+    <strong>A minimalist, high-performance service to display your live Spotify activity.</strong>
+  </p>
+  
+  <p align="center">
+    <img src="https://img.shields.io/badge/Spotify-1DB954?style=flat-square&logo=spotify&logoColor=white" alt="Spotify" />
+    <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
+    <img src="https://img.shields.io/badge/Firebase-FFCA28?style=flat-square&logo=firebase&logoColor=black" alt="Firebase" />
+    <img src="https://img.shields.io/badge/Express-000000?style=flat-square&logo=express&logoColor=white" alt="Express" />
+    <img src="https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node.js" />
+  </p>
 
-A minimalist, high-performance service to display your live Spotify activity on your GitHub profile, personal website, or blog.
-
-![Preview Example](https://img.shields.io/badge/Status-Live-brightgreen)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
-![Firebase](https://img.shields.io/badge/Storage-Firestore-orange)
-
-[![Spotify Now Playing](https://spotify.beebombshell.com/now-playing?uid=4d2fff1bf3)](https://spotify.beebombshell.com/now-playing?uid=4d2fff1bf3)
+  <p align="center">
+    <a href="https://spotify.beebombshell.com/now-playing?uid=4d2fff1bf3">
+      <img src="https://spotify.beebombshell.com/now-playing?uid=4d2fff1bf3" alt="Spotify Now Playing" />
+    </a>
+  </p>
+</div>
 
 ## ✨ Features
 
@@ -32,53 +43,52 @@ A minimalist, high-performance service to display your live Spotify activity on 
 
 ## 🛠️ Setup Instructions
 
-### 1. Spotify Developer Setup
-- Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
-- Create a new App.
-- Add `http://localhost:3000/callback` (or your production URL) to the **Redirect URIs**.
-- Note down your **Client ID** and **Client Secret**.
+This service allows users to provide their own Spotify Client ID and Secret, bypassing Spotify's developmental 25-user limit.
 
-### 2. Firebase Setup
+### 📋 Individual User Setup
+To use this widget on your profile:
+1.  Visit the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
+2.  Click **Create app** and give it a name (e.g., "My Profile Widget").
+3.  In **Settings**, add the following **Redirect URI**:
+    `https://spotify.beebombshell.com/callback` (or your instance URL).
+4.  Copy your **Client ID** and **Client Secret**.
+5.  Enter them on the [Home Page](https://spotify.beebombshell.com) to connect your account.
+
+---
+
+### ⚙️ Server Instance Setup (Self-Hosting)
+
+If you want to host your own instance of this service:
+
+#### 1. Firebase Setup
 - Create a project in the [Firebase Console](https://console.firebase.google.com/).
 - Enable **Firestore Database**.
-- Go to **Project Settings** > **Service Accounts**.
-- Generate a new private key (JSON).
-- Copy the content of the JSON file (or base64 encode it) for the environment variables.
+- Go to **Project Settings** > **Service Accounts** and generate a new private key (JSON).
 
-### 3. Local Installation
-
+#### 2. Local Installation
 ```bash
-# Clone the repository
-git clone <your-repo-url>
+git clone https://github.com/BeeBombshell/now-playing.git
 cd now-playing
-
-# Install dependencies
 npm install
-
-# Setup environment variables
-cp .env.example .env
-# Edit .env with your Spotify and Firebase credentials
 ```
 
-### 4. Environment Variables
+#### 3. Environment Variables
+Create a `.env` file from `.env.example`:
 
 | Variable | Description |
 | :--- | :--- |
-| `SPOTIFY_CLIENT_ID` | Your Spotify App Client ID |
-| `SPOTIFY_SECRET_ID` | Your Spotify App Client Secret |
-| `REDIRECT_URI` | Must match Spotify App settings |
-| `SESSION_SECRET` | A secure random string for signing cookies (e.g., `openssl rand -base64 32`) |
-| `PORT` | Port to run the server (default 3000) |
-| `FIREBASE_PROJECT_ID` | Your Firebase Project ID |
-| `FIREBASE_SERVICE_ACCOUNT` | Raw JSON or Base64 encoded Service Account key |
+| `SESSION_SECRET` | A secure random string for signing cookies. |
+| `REDIRECT_URI` | The callback URL (e.g., `https://your-domain.com/callback`). |
+| `FIREBASE_PROJECT_ID` | Your Firebase Project ID. |
+| `FIREBASE_SERVICE_ACCOUNT` | Raw JSON or Base64 encoded Service Account key. |
+| `PORT` | Port to run the server (default 3000). |
 
-### 5. Running the App
-
+#### 4. Running the App
 ```bash
-# Development mode (with nodemon)
+# Development mode
 npm run dev
 
-# Build and Start
+# Production mode
 npm run build
 npm start
 ```
