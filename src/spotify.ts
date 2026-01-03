@@ -12,7 +12,7 @@ const CLIENT_SECRET = process.env.SPOTIFY_SECRET_ID;
 const REDIRECT_URI = process.env.REDIRECT_URI || "https://spotify.beebombshell.com/callback";
 
 export const getAuthUrl = (state: string, clientId: string) => {
-  const scope = 'user-read-currently-playing user-read-playback-state user-read-private';
+  const scope = 'user-read-currently-playing user-read-playback-state user-read-private user-read-recently-played';
   return `https://accounts.spotify.com/authorize?response_type=code&client_id=${clientId}&scope=${encodeURIComponent(
     scope
   )}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&state=${state}`;
@@ -96,15 +96,69 @@ export const getNowPlaying = async (uid: string) => {
       },
     });
 
-    if (response.status === 204 || response.status > 400 || !response.data) {
+    if (response.status === 204 || response.status > 400 || !response.data || !response.data.item) {
+      // Nothing currently playing, fallback to lastPlayed from DB
+      if (user.lastPlayed) {
+        const fallbackData = {
+          ...user.lastPlayed,
+          is_playing: false,
+          is_fallback: true
+        };
+        cache.set(uid, fallbackData);
+        return fallbackData;
+      }
+      
+      // If no lastPlayed in DB, try to fetch from Spotify recently-played (as extra fallback)
+      try {
+        const recentResponse = await axios.get('https://api.spotify.com/v1/me/player/recently-played?limit=1', {
+          headers: {
+            Authorization: `Bearer ${user.accessToken}`,
+          },
+        });
+        if (recentResponse.data && recentResponse.data.items && recentResponse.data.items.length > 0) {
+          const recentTrack = recentResponse.data.items[0].track;
+          const fallbackData = {
+            item: recentTrack,
+            is_playing: false,
+            is_fallback: true
+          };
+          
+          // Save this as lastPlayed for future
+          saveUser(uid, {
+            ...user,
+            lastPlayed: { item: recentTrack }
+          } as any);
+
+          cache.set(uid, fallbackData);
+          return fallbackData;
+        }
+      } catch (e) {
+        console.error('Error fetching recently played as fallback:', e);
+      }
+
       cache.set(uid, null);
       return null;
     }
 
-    cache.set(uid, response.data);
-    return response.data;
+    const data = {
+      ...response.data,
+      is_fallback: false
+    };
+
+    // Update lastPlayed in DB whenever we get a fresh track
+    saveUser(uid, {
+      ...user,
+      lastPlayed: { item: data.item }
+    } as any);
+
+    cache.set(uid, data);
+    return data;
   } catch (error) {
     console.error('Error fetching now playing track:', error);
+    // Even on error, try fallback
+    if (user.lastPlayed) {
+      return { ...user.lastPlayed, is_playing: false, is_fallback: true };
+    }
     return null;
   }
 };

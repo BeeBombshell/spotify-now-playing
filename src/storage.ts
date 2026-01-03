@@ -50,6 +50,7 @@ interface UserData {
   expiresAt: number;
   clientId: string;
   clientSecret: string;
+  lastPlayed?: any;
 }
 
 export const saveUser = async (uid: string, data: Omit<UserData, 'uid'>) => {
